@@ -24,53 +24,81 @@ import javax.swing.JFrame;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 
-public class Background{	
+//4/8/15: added game over screen, updated ammo picture when mouse released,
+//		  enabled looping back start of game from game over
+
+public class Background{		
 	public static void main (String [] args){
 		JFrame frame = new JFrame( "Duck Hunt");
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);	
+		GamePanel gamepanel = new GamePanel();	
+		GameOver overpanel = new GameOver();
 		
-		GamePanel gpanel = new GamePanel();		
-	   
-		frame.add(gpanel);
-		gpanel.addMouseListener(new MouseListener(){
-			
+		overpanel.addMouseListener(new MouseListener(){
+			@Override
 	        public void mouseReleased(MouseEvent e) {
-	            System.out.println(":MOUSE_RELEASED_EVENT:");
+				gamepanel.ammo = 3;
+		    	overpanel.setVisible(false);
+		    	gamepanel.setVisible(true);
+		    	
 	        }
-	        
+	        @Override
 	        public void mousePressed(MouseEvent e) {
 	            System.out.println("----------------------------------\n:MOUSE_PRESSED_EVENT:");
 	        }
-	       
+	       @Override
+	        public void mouseExited(MouseEvent e) {
+	   //         System.out.println(":MOUSE_EXITED_EVENT:");
+	        }
+	       @Override
+	        public void mouseEntered(MouseEvent e) {
+	 //           System.out.println(":MOUSE_ENTER_EVENT:");
+	        }
+	       @Override
+	        public void mouseClicked(MouseEvent e) {
+	    	   
+	    	}	        	
+		});	
+		gamepanel.addMouseListener(new MouseListener(){
+			@Override
+	        public void mouseReleased(MouseEvent e) {
+				frame.add(overpanel);
+				gamepanel.ammo--;
+		    	   if (gamepanel.ammo <= 0){
+		    		   	 overpanel.setVisible(true);
+		    		   	 gamepanel.setVisible(false);
+		  	    		
+		    	   }
+		    	  System.out.println(gamepanel.ammo);
+			}
+	        @Override
+	        public void mousePressed(MouseEvent e) {
+	            System.out.println("----------------------------------\n:MOUSE_PRESSED_EVENT:");
+	        }
+	       @Override
 	        public void mouseExited(MouseEvent e) {
 	            System.out.println(":MOUSE_EXITED_EVENT:");
 	        }
-	      
+	       @Override
 	        public void mouseEntered(MouseEvent e) {
-	        //	Toolkit toolkit = Toolkit.getDefaultToolkit();
-	    	//	Image image = toolkit.getImage("cursor.png");
-	    	//	Point cursorHotspot = new Point(0,0);
-	    	//	Cursor crosshair = toolkit.createCustomCursor(image, cursorHotspot, "crosshair");	
-	    	//	gpanel.setCursor(crosshair);
 	            System.out.println(":MOUSE_ENTER_EVENT:");
 	        }
+	       @Override
 	        public void mouseClicked(MouseEvent e) {
-	        	gpanel.ammo--;
+	    	   
+	    	}	        	
+		});	
+		frame.add(gamepanel);
+		frame.setSize(805, 505);
+		frame.setVisible(true);		
+		frame.setResizable(false);	
+		
 	
-	        }
-		});
-		//   gpanel.setCursor(crosshair);
-	    frame.setSize(805, 505);
-		frame.setVisible(true);
-		//doesn't allow user to resize frame
-		frame.setResizable(false);
+		
 	}
-}
+		
 
-
-//extend mouse adapter
-
-class GamePanel extends JPanel implements ActionListener{
+static class GamePanel extends JPanel implements ActionListener{
 
 	private boolean wingsdown = true;
 	private final int MIN_X = 38;
@@ -78,7 +106,7 @@ class GamePanel extends JPanel implements ActionListener{
 	private final int MIN_Y = 35; 			//this one somehow effects the ground not the top		
 	private final int MAX_Y = 345;			//above the ground
 	private final int INC_AMOUNT = 35;		//start at 35 we can inc this by 10 each round and cap at 100?
-	private int DELAY = 400;
+	private int DELAY = 500;
 	protected Timer timer;
 	private Random random= new Random();
 	private int x = random.nextInt(MAX_X);
@@ -88,14 +116,24 @@ class GamePanel extends JPanel implements ActionListener{
 	private BufferedImage bg;			//background
 	private BufferedImage inflight,duck1, duck2;	//duck
 	private BufferedImage bar10,bar9,bar8,bar7,bar6,bar5,bar4,bar3,bar2,bar1;		//full bar
-	private BufferedImage ammo3,ammo2,ammo1,ammo0;
+	private BufferedImage ammo3,ammo2,ammo1,ammo0,ammobar;
+	public static int ammo = 3;
 	
-	public int ammo = 3;
-	
+	@Override
 	public void actionPerformed(ActionEvent e)
 	{	
 		wingsdown = !wingsdown;
 		inflight = wingsdown ? duck1: duck2;	
+		
+		if(ammo == 3)
+			ammobar = ammo3;
+		else if (ammo == 2)
+			ammobar = ammo2;
+		else if(ammo == 1)
+			ammobar = ammo1;
+		else 
+			ammobar = ammo0;
+		
 		repaint();	
 	}
 	
@@ -117,6 +155,7 @@ class GamePanel extends JPanel implements ActionListener{
 		timer.start();
 	}
 	
+	@Override
 	protected void paintComponent(Graphics g){
 		super.paintComponent(g);
 
@@ -131,18 +170,11 @@ class GamePanel extends JPanel implements ActionListener{
 		y += dy;
 		g.drawImage(bg,0,0,null);
 		g.drawImage(bar10, 305, 426, null);
-		if (ammo == 3)
-			g.drawImage(ammo3, 25, 426, null);
-		else if (ammo ==2)
-			g.drawImage(ammo2, 25, 426,null);
-		else if (ammo == 1)
-			g.drawImage(ammo1, 25, 426,null);
-		else
-			g.drawImage(ammo0, 25, 426,null);
+		g.drawImage(ammobar, 25, 426,null);
 		g.drawImage(inflight, x-MIN_X, y-MIN_Y, null);
 	}
 
-
+}
 	
 }
 	
